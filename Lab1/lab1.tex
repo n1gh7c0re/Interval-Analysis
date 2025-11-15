@@ -1,0 +1,327 @@
+\documentclass[12pt,a4paper]{article}
+% Russian support
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+% Math, URL, layout
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{caption}
+\geometry{
+  left=25mm,
+  right=25mm,
+  top=25mm,
+  bottom=25mm
+}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  pdfauthor={Тишковец Сергей},
+  pdftitle={Отчёт по лабораторной работе №1 — Интервальный анализ}
+}
+\begin{document}
+\selectlanguage{russian}
+\begin{titlepage}
+  \begin{center}
+    {Санкт-Петербургский политехнический университет Петра Великого\\
+    Институт прикладной математики и механики\\[0.5em]
+    \textbf{Высшая школа прикладной математики и вычислительной физики}}
+   
+    \vfill
+   
+    {\LARGE\bfseries Отчёт по лабораторной работе №1\par}
+    \vspace{1em}
+    {\Large по дисциплине\\[0.3em] {\bfseries «Интервальный анализ»}}
+   
+    \vfill
+   
+    \begin{flushright}
+        Выполнил\\
+        студент гр. 5030102/20202: Тишковец Сергей
+    \end{flushright}
+   
+   
+    \begin{flushright}
+        Проверил\\
+        Преподаватель: Баженов Александр Николаевич
+    \end{flushright}
+   
+    \vfill
+    Санкт-Петербург\\
+    2025
+  \end{center}
+\end{titlepage}
+\setcounter{page}{2}
+\tableofcontents
+\newpage
+\section{Постановка задачи}
+Дана ИСЛАУ:
+\begin{equation}\label{eq:Ax=b}
+A x = b,\qquad x=(x_1,x_2,x_3)^{T}
+\end{equation}
+с матрицей $A$ с заданной серединой (mid) и радиусом (rad).
+\begin{equation}\label{eq:midA}
+\operatorname{mid}A=
+\begin{pmatrix}
+0.95 & 1.00\\[0.2em]
+1.05 & 1.00\\[0.2em]
+1.10 & 1.00
+\end{pmatrix}
+\end{equation}
+Радиус может быть двух видов:
+\begin{equation}\label{eq:radA_full}
+\operatorname{rad}A=\delta
+\begin{pmatrix}
+1.00 & 1.00\\[0.2em]
+1.00 & 1.00\\[0.2em]
+1.00 & 1.00
+\end{pmatrix}
+\end{equation}
+или
+\begin{equation}\label{eq:radA_firstcol}
+\operatorname{rad}A=\delta
+\begin{pmatrix}
+1.00 & 0.00\\[0.2em]
+1.00 & 0.00\\[0.2em]
+1.00 & 0.00
+\end{pmatrix}
+\end{equation}
+Задачи:
+\begin{enumerate}
+  \item Найти диапазоны значений $\delta$, при которых $0\in\det[A]$:
+  \begin{equation}\label{eq:A_interval_full}
+  A=
+  \begin{pmatrix}
+  [0.95-\delta,\,0.95+\delta] & [1.00-\delta,\,1.00+\delta]\\[0.2em]
+  [1.05-\delta,\,1.05+\delta] & [1.00-\delta,\,1.00+\delta]\\[0.2em]
+  [1.10-\delta,\,1.10+\delta] & [1.00-\delta,\,1.00+\delta]
+  \end{pmatrix}
+  \end{equation}
+  или
+  \begin{equation}\label{eq:A_interval_regress}
+  A=
+  \begin{pmatrix}
+  [0.95-\delta,\,0.95+\delta] & 1.00\\[0.2em]
+  [1.05-\delta,\,1.05+\delta] & 1.00\\[0.2em]
+  [1.10-\delta,\,1.10+\delta] & 1.00
+  \end{pmatrix}.
+  \end{equation}
+  \item Для минимального значения радиуса $\min\delta$ найти точечную матрицу $A'$ такую, что
+  \[
+  \det A' = 0.
+  \]
+  \item Обсудить смысл факта $\det A' = 0$ для задач 2-ракурсной томографии и линейной регрессии.
+\end{enumerate}
+\newpage
+\section{Теория}
+\subsection{Интервальные матрицы}
+Интервальная матрица $[A]$ — матрица, каждый элемент которой задан интервалом
+\[
+[a_{ij}]=[\operatorname{mid}a_{ij}-\operatorname{rad}a_{ij},\ \operatorname{mid}a_{ij}+\operatorname{rad}a_{ij}].
+\]
+где ${mid}a_{ij}$ - середина интервала, ${rad}a_{ij}$ - радиус интервала. Таким образом:
+\[
+a_{ij}\in[\operatorname{mid}a_{ij}-\operatorname{rad}a_{ij},\ \operatorname{mid}a_{ij}+\operatorname{rad}a_{ij}]
+\]
+Интервальные матрицы позволяют учитывать неопределенности в данных, например, погрешности измерений или варьирующиеся параметры системы.
+\subsection{Особенность матрицы}
+Матрица называется вырожденной (особенной), если её определитель равен нулю:
+\[
+\det(A)=0.
+\]
+Для прямоугольной матрицы типа $3\times2$ особенность соответствует линейной зависимости столбцов:
+\begin{equation}
+    \text{столбцы } c_1,c_2 \text{ коллинеарны} \Longleftrightarrow \exists\lambda:\ c_1=\lambda c_2
+\end{equation}
+\subsection{Концепция \emph{collinear columns}}
+Матрица $A'$ считается вырожденной, если её две колонки линейно зависимы:
+\[
+a_i \approx \lambda b_i,\quad i=1,2,3,
+\]
+где $a_i$ и $b_i$ — элементы первой и второй колонок соответственно. Для каждой строки можно определить интервал значений набора $\lambda_i$:
+\[
+\lambda_i \in \left[\frac{a^{(i)}_{\min}}{b^{(i)}_{\max}},\ \frac{a^{(i)}_{\max}}{b^{(i)}_{\min}}\right].
+\]
+Пересечение этих интервалов по всем строкам даёт общий диапазон $\lambda$, в котором колонки могут быть коллинеарны.
+
+\subsection{Метод миноров}
+Матрица $3\times2$ имеет ранг меньше 2 (вырождена), если все её $2\times2$-миноры содержат 0 в интервальной оценке. Для пары строк \(i<j\) минор
+\[
+M_{ij}=a_{i1}a_{j2}-a_{i2}a_{j1}.
+\]
+Интервальная оценка $M_{ij}$ линейна по $\delta$, и порог $\delta_{ij}$ — минимальное $\delta$, при котором $0\in M_{ij}$. Минимальное $\delta_{\min} = \max_{ij} \delta_{ij}$ обеспечивает, что все миноры одновременно содержат 0.
+\subsection{Применение в задачах}
+\begin{itemize}
+  \item \textbf{TOMO (2-ракурсная томография)}: оба элемента строки варьируются $\pm\delta$: $[a_i-\delta,a_i+\delta]$, $[b_i-\delta,b_i+\delta]$.
+  \item \textbf{REGRESS (линейная регрессия)}: только первый элемент строки варьируется $[a_i-\delta,a_i+\delta]$, второй фиксирован $b_i$.
+\end{itemize}
+\section{Программная реализация}
+Лабораторная работа выполнена на Python в VS Code. Использовалась библиотека \texttt{numpy}.
+\section{Результаты}
+% \subsection{Для 2-ракурсной томографии}
+% По результатам вычислений найдено:
+% \[
+% \forall \delta \ge 0.037038:\quad 0\in\det(A).
+% \]
+% \subsection{Для линейной регрессии}
+% По результатам вычислений найдено:
+% \[
+% \forall \delta \ge 0.075001:\quad 0\in\det(A).
+% \]
+% \subsection{Минимальный $\delta$ для вырожденности матрицы}
+\subsection{Регрессия}
+Матрица:
+\[
+A =
+\begin{pmatrix}
+0.95 & 1 \\
+1.05 & 1 \\
+1.10 & 1
+\end{pmatrix}, \quad
+\mathrm{rad}A =
+\begin{pmatrix}
+\delta & 0\\
+\delta & 0\\
+\delta & 0
+\end{pmatrix}.
+\]
+Вторая колонка фиксирована, $2\times2$-миноры:
+\[
+M_{ij} = a_{i1} - a_{j1}, \quad i,j = 1,2,3.
+\]
+Пересечение интервалов первой колонки даёт условие
+\[
+\max_i(c_i-\delta)\le\min_i(c_i+\delta)\quad\Longrightarrow\quad 1.10-\delta\le 0.95+\delta,
+\]
+откуда
+\[
+\boxed{\delta_{\text{регрессия}}=\frac{0.15}{2}=0.075.}
+\]
+Для минимального $\delta$ точечная матрица
+\[
+A'=
+\begin{pmatrix}
+1.024999 & 1.00\\[0.2em]
+1.024999 & 1.00\\[0.2em]
+1.024999 & 1.00
+\end{pmatrix},
+\qquad \det A' = 0.
+\]
+\textit{Обоснование.}
+Матрица становится вырожденной, когда все строки линейно зависимы, то есть первая координата может принимать одно общее значение. Это эквивалентно непустому пересечению интервалов $[c_i-\delta, c_i+\delta]$, что и даёт приведённое условие.
+\subsection{Томография}
+Матрица с равными радиусами:
+\[
+A =
+\begin{pmatrix}
+0.95 & 1 \\
+1.05 & 1 \\
+1.10 & 1
+\end{pmatrix}, \qquad
+\mathrm{rad}A =
+\begin{pmatrix}
+\delta & \delta\\
+\delta & \delta\\
+\delta & \delta
+\end{pmatrix}.
+\]
+Обозначения:
+\[
+c_1=0.95,\quad c_2=1.05,\quad c_3=1.10,\qquad a_{i1}\in[c_i-\delta,c_i+\delta],\ a_{i2}\in[1-\delta,1+\delta].
+\]
+Для пары строк \(i<j\) минор
+\[
+M_{ij}=a_{i1}a_{j2}-a_{i2}a_{j1}.
+\]
+Интервальная оценка
+\[
+M_{ij}\in\big[(c_i-c_j)-\delta(c_i+c_j+2),\ (c_i-c_j)+\delta(c_i+c_j+2)\big].
+\]
+Отсюда порог для попадания 0 в интервал минора:
+\[
+\delta_{ij}=\frac{c_j-c_i}{\,c_i+c_j+2\,}.
+\]
+Посчитаем для каждой пары:\\
+\medskip
+\textbf{Минор \(M_{12}\):}
+\[
+c_1-c_2=-0.10,\qquad c_1+c_2+2=0.95+1.05+2=4.00,
+\]
+\[
+M_{12}\in[-0.10-4.00\delta,\ -0.10+4.00\delta],
+\]
+\[
+{\delta_{12}=\frac{0.10}{4.00}=0.025.}
+\]
+\medskip
+\textbf{Минор \(M_{13}\):}
+\[
+c_1-c_3=-0.15,\qquad c_1+c_3+2=0.95+1.10+2=4.05,
+\]
+\[
+M_{13}\in[-0.15-4.05\delta,\ -0.15+4.05\delta],
+\]
+\[
+{\delta_{13}=\frac{0.15}{4.05}=\frac{1}{27}\approx0.037037\ldots}
+\]
+\medskip
+\textbf{Минор \(M_{23}\):}
+\[
+c_2-c_3=-0.05,\qquad c_2+c_3+2=1.05+1.10+2=4.15,
+\]
+\[
+M_{23}\in[-0.05-4.15\delta,\ -0.05+4.15\delta],
+\]
+\[
+{\delta_{23}=\frac{0.05}{4.15}=\frac{5}{415}\approx0.012048\ldots}
+\]
+\bigskip
+Так как
+\[
+\delta_{23}\approx0.01205,\quad \delta_{12}=0.025,\quad \delta_{13}\approx0.03704,
+\]
+то наименьшее значение \(\delta\), при котором существует возможность сделать все три минoра содержащими 0, равно наибольшему из порогов:
+\[
+\boxed{\delta_{\min}=\delta_{13}=\frac{1}{27}\approx0.037037.}
+\]
+Для минимального $\delta$ получена точечная матрица
+\[
+A'=
+\begin{pmatrix}
+0.987036 & 0.962964\\[0.2em]
+1.037962 & 1.012647\\[0.2em]
+1.062962 & 1.037038
+\end{pmatrix},
+\qquad \det A' = 0.
+\]
+\section{Выводы}
+\subsection{Обсуждение результатов}
+
+Факт $\det A' = 0$ указывает на критический уровень
+неопределённости $\delta$, при котором система становится вырожденной.
+
+В задачах томографии это означает возможную нестабильность восстановления: система может иметь бесконечно много решений или быть несовместной.
+
+В линейной регрессии вырожденность матрицы наблюдений делает неприменимым метод наименьших квадратов без регуляризации.
+
+Таким образом, $\det A' = 0$ служит индикатором предельного уровня неопределённости, влияющего на корректность и устойчивость решения задачи.
+
+\subsection{Метод коллинеарных столбцов vs Метод миноров}
+Метод коллинеарных столбцов имеет ряд проблем:
+\begin{itemize}
+  \item Требует строго положительных знаменателей, что не всегда выполняется при широких интервалах $\delta$.
+  \item Переоценивает границы интервалов $\lambda_i$ из-за использования экстремальных значений, игнорируя зависимости между элементами строки.
+  \item Сложно обобщается на матрицы с более чем двумя столбцами, в отличие от метода миноров.
+\end{itemize}
+Метод миноров предпочтительнее, поскольку:
+\begin{itemize}
+    \item Напрямую проверяет условие вырожденности (все миноры содержат 0).
+    \item Не зависит от предположений о $\lambda$ или знаках.
+    \item Дает аналитическое решение $\delta$.
+\end{itemize}
+
+\end{document}
